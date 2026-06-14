@@ -1,53 +1,15 @@
-#include "hal.h"
-
 #include <algorithm>
 #include <cmath>
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-namespace {
-float clampf(float v, float lo, float hi)
-{
-  return std::clamp(v, lo, hi);
-}
-
-// Linear interpolation between two int endpoints
-int lerp_us(float t, int a, int b)
-{
-  return static_cast<int>(std::round(static_cast<float>(a) + t * static_cast<float>(b - a)));
-}
-}  // namespace
-
-// ---------------------------------------------------------------------------
-// Servo
-// ---------------------------------------------------------------------------
-std::expected<void, std::string> Servo::steer(float t)
-{
-  t = clampf(t, -1.0f, 1.0f);
-
-  int pulse_us{};
-  if (t < 0.0f)
-    // Left side: center → left_us
-    pulse_us = lerp_us(-t, cfg_.center_us, cfg_.left_us);
-  else
-    // Right side: center → right_us
-    pulse_us = lerp_us(t, cfg_.center_us, cfg_.right_us);
-
-  return pwm_.set_pulse_us(cfg_.channel, pulse_us);
-}
-
-std::expected<void, std::string> Servo::center()
-{
-  return pwm_.set_pulse_us(cfg_.channel, cfg_.center_us);
-}
+#include "speed_controller.h"
+#include "pwm_controller.h"
 
 // ---------------------------------------------------------------------------
 // Esc
 // ---------------------------------------------------------------------------
 std::expected<void, std::string> Esc::throttle(float t)
 {
-  t = clampf(t, -1.0f, 1.0f);
+  t = std::clamp(t, -1.0f, 1.0f);
   const auto now = std::chrono::steady_clock::now();
 
   int pulse_us{};
@@ -65,7 +27,10 @@ std::expected<void, std::string> Esc::throttle(float t)
   } else if (t > 0.0f) {
     reverse_state_ = ReverseState::Ready;
     // Map (0, 1] → [creep_us, max_forward_us]
-    pulse_us = lerp_us(t, cfg_.creep_us, cfg_.max_forward_us);
+    pulse_us = static_cast<int>(std::lerp(
+        static_cast<float>(cfg_.creep_us),
+        static_cast<float>(cfg_.max_forward_us),
+        t));
   } else {
     if (reverse_state_ == ReverseState::Ready) {
       reverse_state_ = ReverseState::BrakePulse;
@@ -96,7 +61,10 @@ std::expected<void, std::string> Esc::throttle(float t)
     }
 
     // Map [-1, 0) → [max_reverse_us, reverse_creep_us]
-    pulse_us = lerp_us(-t, cfg_.reverse_creep_us, cfg_.max_reverse_us);
+    pulse_us = static_cast<int>(std::lerp(
+      static_cast<float>(cfg_.reverse_creep_us),
+      static_cast<float>(cfg_.max_reverse_us),
+      -t));
   }
 
   return pwm_.set_pulse_us(cfg_.channel, pulse_us);

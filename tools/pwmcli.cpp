@@ -10,8 +10,9 @@
 #include <string_view>
 
 #include "config.h"
-#include "hal.h"
-#include "pwm.h"
+#include "pwm_controller.h"
+#include "servo.h"
+#include "speed_controller.h"
 
 // ---------------------------------------------------------------------------
 // Signal handling — Ctrl-C sets a flag so we can clean up gracefully

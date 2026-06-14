@@ -28,8 +28,9 @@ FetchContent_MakeAvailable(fmt)
 # Targets
 # ---------------------------------------------------------------------------
 add_library(autobus_core STATIC
-    pwm.cpp
-    hal.cpp
+    pwm_controller.cpp
+    speed_controller.cpp
+    servo.cpp
 )
 target_include_directories(autobus_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(autobus_core PUBLIC
