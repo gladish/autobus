@@ -9,6 +9,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Dependencies
 # ---------------------------------------------------------------------------
 include(FetchContent)
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(MOSQUITTO REQUIRED IMPORTED_TARGET libmosquitto)
 
 FetchContent_Declare(
     nlohmann_json
@@ -53,7 +56,10 @@ target_compile_options(autobus_core PRIVATE
 
 add_executable(busctld source/main.cpp)
 target_include_directories(busctld PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(busctld PRIVATE autobus_core)
+target_link_libraries(busctld PRIVATE
+    autobus_core
+    PkgConfig::MOSQUITTO
+)
 target_compile_options(busctld PRIVATE
     -Wall
     -Wextra
