@@ -98,10 +98,15 @@
     color: var(--text);
   }
 
+  .steer-line {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
   .controls {
     margin-top: 28px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 14px;
   }
 
@@ -226,7 +231,7 @@
   </div>
 
   <div class="config">
-    <input type="text" id="brokerUrl" value="ws://100.113.97.42:9001" spellcheck="false">
+    <input type="text" id="brokerUrl" value="ws://10.0.0.144:9001" spellcheck="false">
     <button id="connectBtn">connect</button>
   </div>
 
@@ -235,10 +240,19 @@
     <span>bus/cmd/drive</span>
   </div>
 
+  <div class="topic-line steer-line">
+    <span>current steer</span>
+    <span id="steerValue">0.0</span>
+  </div>
+
   <div class="controls">
     <button class="steer-btn" id="leftBtn" data-dir="left">
       <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
       <span class="steer-label">left</span>
+    </button>
+    <button class="steer-btn" id="centerBtn" data-dir="center">
+      <svg viewBox="0 0 24 24"><path d="M12 4v16"/></svg>
+      <span class="steer-label">center</span>
     </button>
     <button class="steer-btn" id="rightBtn" data-dir="right">
       <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
@@ -255,19 +269,37 @@
   const brokerUrlInput = document.getElementById('brokerUrl');
   const connectBtn = document.getElementById('connectBtn');
   const logEl = document.getElementById('log');
+  const steerValueEl = document.getElementById('steerValue');
   const leftBtn = document.getElementById('leftBtn');
+  const centerBtn = document.getElementById('centerBtn');
   const rightBtn = document.getElementById('rightBtn');
 
   const TOPIC = 'bus/cmd/drive';
   let client = null;
+  let currentSteer = 0;
+  const STEER_STEP = 0.1;
+  const MIN_STEER = -1;
+  const MAX_STEER = 1;
 
-  // Single-click = single command pulse.
-  // throttle stays 0 here since these buttons only steer; wire up
-  // a throttle control separately when you're ready for that.
-  const PAYLOADS = {
-    left:  { throttle: 0, steer: -0.5 },
-    right: { throttle: 0, steer: 0.5 }
-  };
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function updateSteerValue() {
+    steerValueEl.textContent = currentSteer.toFixed(1);
+  }
+
+  function nextSteer(dir) {
+    if (dir === 'left') {
+      currentSteer = clamp(currentSteer - STEER_STEP, MIN_STEER, MAX_STEER);
+    } else if (dir === 'right') {
+      currentSteer = clamp(currentSteer + STEER_STEP, MIN_STEER, MAX_STEER);
+    } else if (dir === 'center') {
+      currentSteer = 0;
+    }
+    updateSteerValue();
+    return Number(currentSteer.toFixed(1));
+  }
 
   function setStatus(connected, label) {
     statusDot.classList.toggle('connected', connected);
@@ -276,9 +308,10 @@
 
   function log(dir, payload) {
     const ts = new Date().toLocaleTimeString('en-US', { hour12: false });
+    const arrows = { left: '\u2190', center: '\u00b7', right: '\u2192' };
     const row = document.createElement('div');
     row.className = 'log-row';
-    row.innerHTML = `<span class="ts">${ts}</span>  <span class="arrow">${dir === 'left' ? '\u2190' : '\u2192'}</span>  ${JSON.stringify(payload)}`;
+    row.innerHTML = `<span class="ts">${ts}</span>  <span class="arrow">${arrows[dir] || '?'}</span>  ${JSON.stringify(payload)}`;
     logEl.appendChild(row);
     logEl.scrollTop = logEl.scrollHeight;
   }
@@ -305,11 +338,13 @@
   }
 
   function sendDrive(dir) {
+    const payload = { steer: nextSteer(dir) };
+
     if (!client || !client.connected) {
-      log(dir, { error: 'not connected — click ' + dir + ' had nowhere to go' });
+      log(dir, { ...payload, error: 'not connected — click ' + dir + ' had nowhere to go' });
       return;
     }
-    const payload = PAYLOADS[dir];
+
     client.publish(TOPIC, JSON.stringify(payload), { qos: 1 });
     log(dir, payload);
   }
@@ -320,8 +355,11 @@
   }
 
   leftBtn.addEventListener('click', () => { pressFx(leftBtn); sendDrive('left'); });
+  centerBtn.addEventListener('click', () => { pressFx(centerBtn); sendDrive('center'); });
   rightBtn.addEventListener('click', () => { pressFx(rightBtn); sendDrive('right'); });
   connectBtn.addEventListener('click', connect);
+
+  updateSteerValue();
 
   // auto-connect on load
   connect();
