@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bus // control</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.10.1/mqtt.min.js"></script>
+<style>
+  :root {
+    --bg: #0c1210;
+    --panel: #121a17;
+    --line: #233631;
+    --text: #d8e6df;
+    --dim: #6f8a80;
+    --amber: #ffb454;
+    --amber-dim: #6b4f24;
+    --green: #5ee6a8;
+    --red: #ff5c5c;
+    --mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(94,230,168,0.04), transparent 60%);
+    color: var(--text);
+    font-family: var(--mono);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .panel {
+    width: 100%;
+    max-width: 440px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 28px;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+
+  .title {
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .title strong {
+    color: var(--text);
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--dim);
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 6px var(--red);
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+
+  .dot.connected {
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
+
+  .topic-line {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+    font-size: 11px;
+    color: var(--dim);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .topic-line span:last-child {
+    color: var(--text);
+  }
+
+  .controls {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .steer-btn {
+    appearance: none;
+    border: 1px solid var(--line);
+    background: #0e1613;
+    color: var(--text);
+    border-radius: 8px;
+    padding: 28px 0 18px;
+    font-family: var(--mono);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s, transform 0.05s;
+    user-select: none;
+  }
+
+  .steer-btn:hover {
+    border-color: var(--amber-dim);
+  }
+
+  .steer-btn:active,
+  .steer-btn.pressed {
+    background: #1a1410;
+    border-color: var(--amber);
+    transform: translateY(1px);
+  }
+
+  .steer-btn svg {
+    width: 30px;
+    height: 30px;
+    stroke: var(--text);
+    fill: none;
+    stroke-width: 2;
+  }
+
+  .steer-btn:active svg,
+  .steer-btn.pressed svg {
+    stroke: var(--amber);
+  }
+
+  .steer-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .log {
+    margin-top: 20px;
+    background: #090d0b;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+    height: 110px;
+    overflow-y: auto;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  .log-row {
+    color: var(--dim);
+    white-space: pre;
+  }
+
+  .log-row .arrow { color: var(--amber); }
+  .log-row .ts { color: #3d524b; }
+
+  .config {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .config input {
+    flex: 1;
+    background: #0e1613;
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 8px 10px;
+    border-radius: 6px;
+  }
+
+  .config input:focus {
+    outline: none;
+    border-color: var(--amber-dim);
+  }
+
+  .config button {
+    background: #0e1613;
+    border: 1px solid var(--line);
+    color: var(--dim);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .config button:hover {
+    border-color: var(--amber-dim);
+    color: var(--text);
+  }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="header">
+    <div class="title"><strong>bus</strong> / control</div>
+    <div class="status">
+      <span id="statusText">disconnected</span>
+      <div class="dot" id="statusDot"></div>
+    </div>
+  </div>
+
+  <div class="config">
+    <input type="text" id="brokerUrl" value="ws://100.113.97.42:9001" spellcheck="false">
+    <button id="connectBtn">connect</button>
+  </div>
+
+  <div class="topic-line">
+    <span>publish topic</span>
+    <span>bus/cmd/drive</span>
+  </div>
+
+  <div class="controls">
+    <button class="steer-btn" id="leftBtn" data-dir="left">
+      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+      <span class="steer-label">left</span>
+    </button>
+    <button class="steer-btn" id="rightBtn" data-dir="right">
+      <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      <span class="steer-label">right</span>
+    </button>
+  </div>
+
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+  const statusDot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+  const brokerUrlInput = document.getElementById('brokerUrl');
+  const connectBtn = document.getElementById('connectBtn');
+  const logEl = document.getElementById('log');
+  const leftBtn = document.getElementById('leftBtn');
+  const rightBtn = document.getElementById('rightBtn');
+
+  const TOPIC = 'bus/cmd/drive';
+  let client = null;
+
+  // Single-click = single command pulse.
+  // throttle stays 0 here since these buttons only steer; wire up
+  // a throttle control separately when you're ready for that.
+  const PAYLOADS = {
+    left:  { throttle: 0, steer: -0.5 },
+    right: { throttle: 0, steer: 0.5 }
+  };
+
+  function setStatus(connected, label) {
+    statusDot.classList.toggle('connected', connected);
+    statusText.textContent = label;
+  }
+
+  function log(dir, payload) {
+    const ts = new Date().toLocaleTimeString('en-US', { hour12: false });
+    const row = document.createElement('div');
+    row.className = 'log-row';
+    row.innerHTML = `<span class="ts">${ts}</span>  <span class="arrow">${dir === 'left' ? '\u2190' : '\u2192'}</span>  ${JSON.stringify(payload)}`;
+    logEl.appendChild(row);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function connect() {
+    if (client) {
+      client.end(true);
+    }
+    const url = brokerUrlInput.value.trim();
+    setStatus(false, 'connecting…');
+
+    client = mqtt.connect(url, {
+      connectTimeout: 4000,
+      reconnectPeriod: 2000,
+    });
+
+    client.on('connect', () => setStatus(true, 'connected'));
+    client.on('reconnect', () => setStatus(false, 'reconnecting…'));
+    client.on('close', () => setStatus(false, 'disconnected'));
+    client.on('error', (err) => {
+      setStatus(false, 'error');
+      console.error('MQTT error:', err);
+    });
+  }
+
+  function sendDrive(dir) {
+    if (!client || !client.connected) {
+      log(dir, { error: 'not connected — click ' + dir + ' had nowhere to go' });
+      return;
+    }
+    const payload = PAYLOADS[dir];
+    client.publish(TOPIC, JSON.stringify(payload), { qos: 1 });
+    log(dir, payload);
+  }
+
+  function pressFx(btn) {
+    btn.classList.add('pressed');
+    setTimeout(() => btn.classList.remove('pressed'), 120);
+  }
+
+  leftBtn.addEventListener('click', () => { pressFx(leftBtn); sendDrive('left'); });
+  rightBtn.addEventListener('click', () => { pressFx(rightBtn); sendDrive('right'); });
+  connectBtn.addEventListener('click', connect);
+
+  // auto-connect on load
+  connect();
+</script>
+
+</body>
+</html>
