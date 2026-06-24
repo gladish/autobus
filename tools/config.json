@@ -2,8 +2,8 @@
   "servo": {
     "channel": 0,
     "center_us": 1470,
-    "left_us": 920,
-    "right_us": 2080
+    "left_us": 1100,
+    "right_us": 2000
   },
   "esc": {
     "channel": 8,

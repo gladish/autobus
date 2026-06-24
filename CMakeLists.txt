@@ -28,11 +28,11 @@ FetchContent_MakeAvailable(fmt)
 # Targets
 # ---------------------------------------------------------------------------
 add_library(autobus_core STATIC
-    pwm_controller.cpp
-    speed_controller.cpp
-    servo.cpp
+    source/pwm_controller.cpp
+    source/speed_controller.cpp
+    source/servo.cpp
 )
-target_include_directories(autobus_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(autobus_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(autobus_core PUBLIC
     nlohmann_json::nlohmann_json
     fmt::fmt
@@ -51,9 +51,10 @@ target_compile_options(autobus_core PRIVATE
     $<$<CONFIG:Release>:-O2>
 )
 
-add_executable(autobus main.cpp)
-target_link_libraries(autobus PRIVATE autobus_core)
-target_compile_options(autobus PRIVATE
+add_executable(busctld source/main.cpp)
+target_include_directories(busctld PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(busctld PRIVATE autobus_core)
+target_compile_options(busctld PRIVATE
     -Wall
     -Wextra
     -Wpedantic
