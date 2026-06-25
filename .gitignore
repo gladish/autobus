@@ -1,3 +1,4 @@
 build/
 _deps/
 .env/
+__pycache__/
