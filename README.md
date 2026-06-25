@@ -16,17 +16,22 @@ I'm going to take one of these trucks (bus) and convert it into a fully autonomo
 ## Plan 
 ### Phase 1 - Hardware augmentation
 First is to outfit the bus with some new hardware. For this I went back and forth between an Arduino UnoQ and a Raspberry Pi. I'm going with an RPi for a few reasons. I'm going to need a decent MPU for vision, networking, and control, and the Pi seems like the better fit.
+
+#### Functional Requirements
+* The bus can boot Linux and I can control some servos with software on Linux.
+* I can attach Ethernet for networking.
+* The servo driver is connected to the RPi.
+* The servos do not have to be bus servos. The bus has electronic speed control.
+
 #### Parts List
 1. https://learn.adafruit.com/16-channel-pwm-servo-driver
 1. https://www.raspberrypi.com/products/raspberry-pi-5
 1. https://www.raspberrypi.com/products/camera-module-3
 2. 5200 mAh Anker USB Power Bank.
 I'm not sure how long that power bank will last, but I have a USB power meter that I'll use later on to figure out how long the Pi will run before it shuts off due to lack of power. That's certainly something I'll need to know.
-#### Functional Requirements
-* The bus can boot Linux and I can control some servos with software on Linux.
-* I can attach Ethernet for networking.
-* The servo driver is connected to the RPi.
-* The servos do not have to be bus servos. The bus has electronic speed control.
+
+![BatteryPowered](docs/images/battery_powerd_pi.png)
+
 
 ### Phase 3 - Network connectivity
 I want connectivity between the bus and my home LAN. This will allow me to monitor the bus, take over manually, and stream video back.
