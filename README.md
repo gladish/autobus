@@ -22,6 +22,21 @@ First is to outfit the bus with some new hardware. For this I went back and fort
 1. https://www.raspberrypi.com/products/camera-module-3
 2. 5200 mAh Anker USB Power Bank.
 I'm not sure how long that powerbank will last, but I have a USB power meter that I'll use later on to figure  out how long pi will run before it shuts off due to lack of power. Certainly something to consider in the software. I don't want a runaway school bus.
+#### Functional Requirements
+* Bus can boot linux and I can control some servos with software on Linux.
+* Ethernet can be attached for network
+* Servo driver connected to rpi.
+* Servos do not have to be bus servos. Bus has electronic speed control.
 
-### Phase 2 - Network connectivity
-### Pahse 3 - Semi-autonomous around the block
+### Phase 3 - Network connectivity
+Get connectivity between bus and home LAN. This will allow me to monitor the bus, take over manually, and stream video back. 
+#### Functional Requirements
+* Desktop PC (windows 11) connected to the bus over WAN (internet)
+* Linux LAN PC connect to bus over WAN (ssh, mqtt).
+* Can stream video from pi cam to windows 11 pc over WAN
+#### iPhone Tether
+The plan is to tether my iPhone to the rpi over USB and enable hotspot on the phone. It's slightly awkward that you enable hotspot to get connectivity over USB, but that's apparently how the iPhone works. Since the iPhone needs to ride with the bus, there's not need to connect to the Wi-Fi, just use USB.
+
+### Pahse 4 - OpenCV Vision Integration
+#### Functional Requirements
+* Bus can navigate itself around block without manual steering
