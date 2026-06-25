@@ -41,29 +41,12 @@ Once the bus has internet connectivity, we'll connect everything on one network 
 
 #### Network Topology
 
-The bus uses a Raspberry Pi 5 running Linux as its onboard computer. For internet access, the Pi is tethered to an iPhone over USB. Once the Pi has upstream connectivity, it joins a Tailscale VPN along with:
+* RPi5 (bus) gets its internet via USB tethering to your iPhone, which uses cellular data.
+* Once online, the RPi5 joins your Tailscale mesh as a node.
+* Your Windows 11 desktop and the Linux relay server (on your home network) are also Tailscale nodes in that same mesh.
+* Tailscale builds direct encrypted tunnels between peers when possible, and the relay server — sitting on your home LAN with stable connectivity — can act as a fallback relay/exit node for the others if direct (NAT-traversed) connections aren't possible.
 
-* a Windows 11 desktop PC
-* a Linux relay server on the home network
-
-This setup gives the bus a secure private network connection back to the systems I use for monitoring, control, SSH access, and video streaming.
-
-```mermaid
-flowchart LR
-    INTERNET["Internet / Cellular Network"]
-    PHONE["iPhone<br/>USB tethering hotspot"]
-    BUS["Bus / Raspberry Pi 5<br/>Linux + Tailscale"]
-    VPN["Tailscale VPN<br/>Private mesh network"]
-    DESKTOP["Desktop PC<br/>Windows 11 + Tailscale"]
-    RELAY["Linux relay server<br/>Home network + Tailscale"]
-
-    BUS -->|USB tethering| PHONE
-    PHONE --> INTERNET
-
-    BUS <--> VPN
-    DESKTOP <--> VPN
-    RELAY <--> VPN
-```
+![Network Topology](docs/images/bus_tailscale_network_diagram.png)
 
 #### Intended Use
 
