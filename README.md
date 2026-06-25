@@ -20,7 +20,7 @@ The first step is to outfit the bus with some new hardware. I went back and fort
 1. I wasn't sure if the UNO-Q's arm core was powerful enougth to run things like OpenCV
 1. The UNO-Q needs a separate board for MIPI CSI cameras.
 1. I already own an rpi5.
-2.  
+   
 I concede that using a newer dual MCP/MPU arduinos would be a cleaner setup since the pi needs an external board to drive servos properly. And although the UNO-Q needs the Arduino Media Carrier board to attach a MIPI CSI camera, it would be a cleaner package. Depending on how the rpi turns out I may try the UNO-Q or just wait for the VENTUNO-Q.
 
 #### M1 Objectives
@@ -37,6 +37,9 @@ I concede that using a newer dual MCP/MPU arduinos would be a cleaner setup sinc
 4. 5200 mAh Anker USB power bank
      
 I’m not sure how long that power bank will last, but I have a USB power meter I can use to measure runtime before the Pi shuts down from low power.
+
+#### Hardware Layout
+![Hardware_Layout](docs/images/rpi5_rc_car_power_diagram.png)
 
 Here’s the Raspberry Pi 5 booted from the Anker power bank:
 
