@@ -2,7 +2,7 @@ from flask import Flask, Response
 from picamera2 import Picamera2
 import cv2
 
-# You can donate at https://www.buymeacoffee.com/mmshilleh
+# python -m flask --app stream run --host=10.10.1.10 --port=10001
 
 app = Flask(__name__)
 

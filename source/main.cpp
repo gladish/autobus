@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "pwm_controller.h"
+#include "speed_controller.h"
 #include "servo.h"
 #include "config.h"
 
@@ -33,7 +34,7 @@ struct BusContext
   Config servo_calibration;
   PwmController pwm;
   std::unique_ptr<Servo> servo;
-  std::string s;
+  std::unique_ptr<Esc> esc;
 };
 
 void on_connect(mosquitto* mosq, void* user_data, int status)
@@ -66,8 +67,6 @@ void on_message(mosquitto* /* mosq */, void* user_data, mosquitto_message const*
     return;
   }
 
-  printf("context: %s\n", ctx->s.c_str());
-
   auto const payload_len = msg->payloadlen > 0 ? static_cast<size_t>(msg->payloadlen) : size_t{0};
   std::string const buff{
       payload_len == 0 ? "" : static_cast<char const*>(msg->payload),
@@ -86,10 +85,15 @@ void on_message(mosquitto* /* mosq */, void* user_data, mosquitto_message const*
     }
   }
 
-  //if (payload_json.contains("throttle")) {
-//    float const throttle = std::clamp(payload_json["throttle"].get<float>(), -1.0f, 1.0f);
-    //(void)throttle; // TODO: wire to ESC
-  //}
+  if (payload_json.contains("throttle")) {
+    float const throttle = std::clamp(payload_json["throttle"].get<float>(), -1.0f, 1.0f);
+    auto const result = (throttle == 0.0f)
+      ? ctx->esc->stop()
+      : ctx->esc->throttle(throttle);
+    if (!result) {
+      printf("[error] throttle: %s\n", result.error().c_str());
+    }
+  }
 
   printf("[%s] %s\n", msg->topic, payload_json.dump().c_str());
 }
@@ -107,7 +111,6 @@ int main(int argc, char* argv[])
 
   std::unique_ptr<BusContext> ctx = std::make_unique<BusContext>();
   ctx->servo_calibration = std::move(*cfg_result);;
-  ctx->s = "drive_listener";
 
   if (auto status = ctx->pwm.open("/dev/i2c-1"); !status) {
     printf("[error] %s\n", status.error().c_str());
@@ -120,6 +123,7 @@ int main(int argc, char* argv[])
   }
 
   ctx->servo = std::make_unique<Servo>(ctx->pwm, ctx->servo_calibration.servo);
+  ctx->esc = std::make_unique<Esc>(ctx->pwm, ctx->servo_calibration.esc);
 
   mosquitto_lib_init();
 
