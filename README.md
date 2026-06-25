@@ -36,7 +36,8 @@ Get connectivity between bus and home LAN. This will allow me to monitor the bus
 * Can stream video from pi cam to windows 11 pc over WAN
 #### iPhone Tether
 The plan is to tether my iPhone to the rpi over USB and enable hotspot on the phone. It's slightly awkward that you enable hotspot to get connectivity over USB, but that's apparently how the iPhone works. Since the iPhone needs to ride with the bus, there's not need to connect to the Wi-Fi, just use USB.
-
+#### VPN
+Once the bus has internet connectivity, we'll connect everything on one network via a VPN. I'm going to use tailscale for this. It was the first zero cost VPN that I found and it's super easy to setup and it works. It's easy to shut off too when you're not using it. The alternative was to power forward on my home router, which I think is just subjecting my home network to outside intruders. I'll have, at most 3 computers on the VPN.
 ### Pahse 4 - OpenCV Vision Integration
 #### Functional Requirements
 * Bus can navigate itself around block without manual steering
