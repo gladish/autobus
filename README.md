@@ -1,6 +1,6 @@
 # Autonomous Vehicle
 
-## Goal: Turn a Tamiya King Yellow 6x6 into a fully autonomous vehicle
+## Objective: Turn a Tamiya King Yellow 6x6 into a fully autonomous vehicle
 
 The King Yellow is a six-wheel-drive RC kit from Tamiya. I’ll skip the nostalgia, but having built a few of these kits, I can say they’re always fun to put together.
 
@@ -18,13 +18,18 @@ I’m going to take one of these buses and convert it into a fully autonomous ve
 
 ## Plan
 
-### Phase 1 - Hardware Augmentation
+### Milestone 1: Hardware Augmentation
 
 The first step is to outfit the bus with new hardware. I went back and forth between an Arduino UNO-Q and a Raspberry Pi, but I’m going with a Raspberry Pi for a few reasons.
 1. I wasn't sure if the UnoQ's arm core was powerful enougth to run things like OpenCV
-1. I already own an rpi5
-1. I'm anxiously waiting for Arduino VENTUNO-Q.
-I concede that using a newer dual MCP/MPU arduino would be a cleaner setup since the pi needs an external board to drive servos properly. And although the UNO-Q needs the Arduino Media Carrier board to attach a MIPI CSI camear, it would be a cleaner package.
+1. I already own an rpi5. I'm anxiously waiting for Arduino VENTUNO-Q. 
+I concede that using a newer dual MCP/MPU arduinos would be a cleaner setup since the pi needs an external board to drive servos properly. And although the UNO-Q needs the Arduino Media Carrier board to attach a MIPI CSI camear, it would be a cleaner package.
+
+#### Milestone Objectives
+- I can control servos from software running on the rpi.
+- Ethernet for networking. Don't worry about wireless just yet
+- The servo driver is wired up to the rpi.
+- Not trying to control the bus yet. Just control a servero by turning it left & right.
 
 #### Parts List
 
@@ -32,14 +37,7 @@ I concede that using a newer dual MCP/MPU arduino would be a cleaner setup since
 2. https://www.raspberrypi.com/products/raspberry-pi-5
 3. https://www.raspberrypi.com/products/camera-module-3
 4. 5200 mAh Anker USB power bank
-   
-#### Functional Requirements
-
-- The bus can boot Linux, and I can control servos from software running on Linux.
-- I can attach Ethernet for networking.
-- The servo driver is connected to the Raspberry Pi.
-- The servos do not need to be specialized bus servos. The bus already has an electronic speed controller.
-- 
+     
 I’m not sure how long that power bank will last, but I have a USB power meter I can use to measure runtime before the Pi shuts down from low power.
 
 Here’s the Raspberry Pi 5 booted from the Anker power bank:
@@ -50,7 +48,7 @@ The Adafruit PCA9685 servo driver is connected and working. The driver itself is
 
 ![ServoDriver](docs/images/servo_driver.png)
 
-### Phase 3 - Network Connectivity
+### Network Connectivity
 
 I want connectivity between the bus and my home LAN. This will let me monitor the bus, take over manually, and stream video back.
 
@@ -89,8 +87,8 @@ This network layout is meant to support a few different tasks:
 
 Using Tailscale means each machine can communicate over a private VPN without exposing services directly to the public internet.
 
-### Phase 4 - OpenCV Vision Integration
-
-#### Functional Requirements
-
+### OpenCV Vision Integration
 - The bus can navigate itself around the block without manual steering
+
+TODO
+
