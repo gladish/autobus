@@ -8,11 +8,7 @@ Here’s a stock photo from Tamiya:
 
 ![The original bus](docs/images/stock_king_yellow.png)
 
-I’m going to take one of these buses and convert it into a fully autonomous vehicle. Before I begin, here’s what I’m starting with:
-
-- It’s mostly stock.
-- I installed a camera from a quadcopter/drone. This is completely separate from the stock electronics and uses its own lithium battery, so I can still run the bus normally without depending on the new system.
-- There’s a GoPro mount on top. I honestly forgot what I used it for, but I probably mounted a GoPro to record runs.
+I’m going to take one of these buses and convert it into a fully autonomous vehicle. I already own one of these that's at least 10 years old, but still functional. It has some hacks on it already that I'm going to undo. For instance, I mounted a drone cam behind the front windshield. My kids and I used to sit on the back porch with a pair of fatsharks and drive it around the house. That's removed. Also, there's a gopro mount on top. I might leave that on just in case.
 
 ![Our base model](docs/images/starter_bus.png)
 
