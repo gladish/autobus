@@ -20,5 +20,8 @@ First is to outfit the bus with some new hardware. For this I went back and fort
 1. https://learn.adafruit.com/16-channel-pwm-servo-driver
 1. https://www.raspberrypi.com/products/raspberry-pi-5
 1. https://www.raspberrypi.com/products/camera-module-3
+2. 5200 mAh Anker USB Power Bank.
+I'm not sure how long that powerbank will last, but I have a USB power meter that I'll use later on to figure  out how long pi will run before it shuts off due to lack of power. Certainly something to consider in the software. I don't want a runaway school bus.
+
 ### Phase 2 - Network connectivity
 ### Pahse 3 - Semi-autonomous around the block
