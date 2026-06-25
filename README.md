@@ -12,3 +12,13 @@ We're going to take one of these trucks (bus) and convert it into a fully autono
 * There's a gopro mount on top. I honestly forget what we did with that, but presumably we mounted a gopro on it to record stuff.
 
 ![Our base model](docs/images/starter_bus.png)
+
+## Plan 
+### Phase 1 - Hardware augmentation
+First is to outfit the bus with some new hardware. For this I went back and forth between an Arduino UnoQ and a Raspberry Pi. I'm going with rpi for a few reasons. We're going to need a decent MPU for Linux to run things like OpenCV, Video Streaming, IP network connections, and MCU for driving servos. I just wasn't sure the Arduino had the power on the MPU side. If I could get my hands on a Ventuno Q, I'd 100% use that board. Instead I'm going use a raspberry pi5, which I already own, and connect up a "servo driver" board.
+#### Parts List
+1. https://learn.adafruit.com/16-channel-pwm-servo-driver
+1. https://www.raspberrypi.com/products/raspberry-pi-5
+1. https://www.raspberrypi.com/products/camera-module-3
+### Phase 2 - Network connectivity
+### Pahse 3 - Semi-autonomous around the block
