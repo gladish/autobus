@@ -110,6 +110,22 @@
     gap: 14px;
   }
 
+  .control-group {
+    margin-top: 20px;
+  }
+
+  .control-group:first-of-type {
+    margin-top: 28px;
+  }
+
+  .control-heading {
+    margin-bottom: 10px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
   .steer-btn {
     appearance: none;
     border: 1px solid var(--line);
@@ -217,6 +233,21 @@
     border-color: var(--amber-dim);
     color: var(--text);
   }
+
+  .video-feed {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .video-feed img {
+    width: 100%;
+    max-width: 320px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #090d0b;
+    display: block;
+  }
 </style>
 </head>
 <body>
@@ -245,19 +276,49 @@
     <span id="steerValue">0.0</span>
   </div>
 
-  <div class="controls">
-    <button class="steer-btn" id="leftBtn" data-dir="left">
-      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-      <span class="steer-label">left</span>
-    </button>
-    <button class="steer-btn" id="centerBtn" data-dir="center">
-      <svg viewBox="0 0 24 24"><path d="M12 4v16"/></svg>
-      <span class="steer-label">center</span>
-    </button>
-    <button class="steer-btn" id="rightBtn" data-dir="right">
-      <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-      <span class="steer-label">right</span>
-    </button>
+  <div class="topic-line steer-line">
+    <span>current throttle</span>
+    <span id="throttleValue">0.0</span>
+  </div>
+
+  <div class="video-feed">
+    <img id="videoStream" src="" alt="video feed">
+  </div>
+
+  <div class="control-group">
+    <div class="control-heading">steer</div>
+    <div class="controls">
+      <button class="steer-btn" id="leftBtn" data-dir="left">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        <span class="steer-label">left</span>
+      </button>
+      <button class="steer-btn" id="centerBtn" data-dir="center">
+        <svg viewBox="0 0 24 24"><path d="M12 4v16"/></svg>
+        <span class="steer-label">center</span>
+      </button>
+      <button class="steer-btn" id="rightBtn" data-dir="right">
+        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        <span class="steer-label">right</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <div class="control-heading">throttle</div>
+    <div class="controls">
+      <button class="steer-btn" id="upBtn" data-dir="up">
+        <svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>
+        <span class="steer-label">up</span>
+      </button>
+      <button class="steer-btn" id="stopBtn" data-dir="stop">
+        <svg viewBox="0 0 24 24"><path d="M8 8h8v8H8z"/></svg>
+        <span class="steer-label">stop</span>
+      </button>
+      <button class="steer-btn" id="downBtn" data-dir="down">
+        <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        <span class="steer-label">down</span>
+      </button>
+    </div>
   </div>
 
   <div class="log" id="log"></div>
@@ -270,16 +331,24 @@
   const connectBtn = document.getElementById('connectBtn');
   const logEl = document.getElementById('log');
   const steerValueEl = document.getElementById('steerValue');
+  const throttleValueEl = document.getElementById('throttleValue');
   const leftBtn = document.getElementById('leftBtn');
   const centerBtn = document.getElementById('centerBtn');
   const rightBtn = document.getElementById('rightBtn');
+  const upBtn = document.getElementById('upBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const downBtn = document.getElementById('downBtn');
 
   const TOPIC = 'bus/cmd/drive';
   let client = null;
   let currentSteer = 0;
+  let currentThrottle = 0;
   const STEER_STEP = 0.1;
+  const THROTTLE_STEP = 0.01;
   const MIN_STEER = -1;
   const MAX_STEER = 1;
+  const MIN_THROTTLE = -1;
+  const MAX_THROTTLE = 1;
 
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -287,6 +356,10 @@
 
   function updateSteerValue() {
     steerValueEl.textContent = currentSteer.toFixed(1);
+  }
+
+  function updateThrottleValue() {
+    throttleValueEl.textContent = currentThrottle.toFixed(2);
   }
 
   function nextSteer(dir) {
@@ -301,6 +374,18 @@
     return Number(currentSteer.toFixed(1));
   }
 
+  function nextThrottle(dir) {
+    if (dir === 'up') {
+      currentThrottle = clamp(currentThrottle + THROTTLE_STEP, MIN_THROTTLE, MAX_THROTTLE);
+    } else if (dir === 'down') {
+      currentThrottle = clamp(currentThrottle - THROTTLE_STEP, MIN_THROTTLE, MAX_THROTTLE);
+    } else if (dir === 'stop') {
+      currentThrottle = 0;
+    }
+    updateThrottleValue();
+    return Number(currentThrottle.toFixed(2));
+  }
+
   function setStatus(connected, label) {
     statusDot.classList.toggle('connected', connected);
     statusText.textContent = label;
@@ -308,7 +393,14 @@
 
   function log(dir, payload) {
     const ts = new Date().toLocaleTimeString('en-US', { hour12: false });
-    const arrows = { left: '\u2190', center: '\u00b7', right: '\u2192' };
+    const arrows = {
+      left: '\u2190',
+      center: '\u00b7',
+      right: '\u2192',
+      up: '\u2191',
+      stop: '\u25a0',
+      down: '\u2193',
+    };
     const row = document.createElement('div');
     row.className = 'log-row';
     row.innerHTML = `<span class="ts">${ts}</span>  <span class="arrow">${arrows[dir] || '?'}</span>  ${JSON.stringify(payload)}`;
@@ -338,7 +430,16 @@
   }
 
   function sendDrive(dir) {
-    const payload = { steer: nextSteer(dir) };
+    if (dir === 'left' || dir === 'center' || dir === 'right') {
+      nextSteer(dir);
+    } else if (dir === 'up' || dir === 'stop' || dir === 'down') {
+      nextThrottle(dir);
+    }
+
+    const payload = {
+      steer: Number(currentSteer.toFixed(1)),
+      throttle: Number(currentThrottle.toFixed(2)),
+    };
 
     if (!client || !client.connected) {
       log(dir, { ...payload, error: 'not connected — click ' + dir + ' had nowhere to go' });
@@ -357,9 +458,25 @@
   leftBtn.addEventListener('click', () => { pressFx(leftBtn); sendDrive('left'); });
   centerBtn.addEventListener('click', () => { pressFx(centerBtn); sendDrive('center'); });
   rightBtn.addEventListener('click', () => { pressFx(rightBtn); sendDrive('right'); });
+  upBtn.addEventListener('click', () => { pressFx(upBtn); sendDrive('up'); });
+  stopBtn.addEventListener('click', () => { pressFx(stopBtn); sendDrive('stop'); });
+  downBtn.addEventListener('click', () => { pressFx(downBtn); sendDrive('down'); });
   connectBtn.addEventListener('click', connect);
 
   updateSteerValue();
+  updateThrottleValue();
+
+  function updateVideoSrc() {
+    const url = brokerUrlInput.value.trim();
+    try {
+      // const host = new URL(url).hostname;
+      const host = "100.64.72.97";
+      document.getElementById('videoStream').src = `http://${host}:10001/video_feed`;
+    } catch (_) {}
+  }
+
+  brokerUrlInput.addEventListener('change', updateVideoSrc);
+  updateVideoSrc();
 
   // auto-connect on load
   connect();
@@ -367,3 +484,4 @@
 
 </body>
 </html>
+
