@@ -27,10 +27,12 @@ First is to outfit the bus with some new hardware. For this I went back and fort
 1. https://learn.adafruit.com/16-channel-pwm-servo-driver
 1. https://www.raspberrypi.com/products/raspberry-pi-5
 1. https://www.raspberrypi.com/products/camera-module-3
-2. 5200 mAh Anker USB Power Bank.
-I'm not sure how long that power bank will last, but I have a USB power meter that I'll use later on to figure out how long the Pi will run before it shuts off due to lack of power. That's certainly something I'll need to know.
+1. 5200 mAh Anker USB Power Bank.
+   
+I'm not sure how long that power bank will last, but I have a USB power meter that I'll use later on to figure out how long the Pi will run before it shuts off due to lack of power. That's certainly something I'll need to know. 
 
-![BatteryPowered](docs/images/battery_powerd_pi.png)
+Here's the rpi5 booted from the Anker
+![BatteryPowered](docs/images/battery_powered_pi.png)
 
 
 ### Phase 3 - Network connectivity
