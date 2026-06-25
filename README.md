@@ -16,13 +16,15 @@ I’m going to take one of these buses and convert it into a fully autonomous ve
 
 ### Milestone 1: Hardware Augmentation
 
-The first step is to outfit the bus with new hardware. I went back and forth between an Arduino UNO-Q and a Raspberry Pi, but I’m going with a Raspberry Pi for a few reasons.
-1. I wasn't sure if the UnoQ's arm core was powerful enougth to run things like OpenCV
-1. I already own an rpi5. I'm anxiously waiting for Arduino VENTUNO-Q. 
-I concede that using a newer dual MCP/MPU arduinos would be a cleaner setup since the pi needs an external board to drive servos properly. And although the UNO-Q needs the Arduino Media Carrier board to attach a MIPI CSI camear, it would be a cleaner package.
+The first step is to outfit the bus with some new hardware. I went back and forth between an Arduino UNO-Q and a Raspberry Pi, but I’m going with a Raspberry Pi for a few reasons.
+1. I wasn't sure if the UNO-Q's arm core was powerful enougth to run things like OpenCV
+1. The UNO-Q needs a separate board for MIPI CSI cameras.
+1. I already own an rpi5.
+2.  
+I concede that using a newer dual MCP/MPU arduinos would be a cleaner setup since the pi needs an external board to drive servos properly. And although the UNO-Q needs the Arduino Media Carrier board to attach a MIPI CSI camera, it would be a cleaner package. Depending on how the rpi turns out I may try the UNO-Q or just wait for the VENTUNO-Q.
 
-#### Milestone Objectives
-- I can control servos from software running on the rpi.
+#### M1 Objectives
+- Can control servos from software running on the rpi.
 - Ethernet for networking. Don't worry about wireless just yet
 - The servo driver is wired up to the rpi.
 - Not trying to control the bus yet. Just control a servero by turning it left & right.
@@ -40,7 +42,7 @@ Here’s the Raspberry Pi 5 booted from the Anker power bank:
 
 ![BatteryPowered](docs/images/battery_powered_pi.png)
 
-The Adafruit PCA9685 servo driver is connected and working. The driver itself is connected to the Raspberry Pi over I2C and powered from one of the Pi’s 3.3V pins. The servos are powered separately as required.
+The Adafruit PCA9685 servo driver is connected and working. The PCA9685 is connected to the Raspberry Pi over I2C and powered from one of the Pi’s 3.3V pins. The servos are powered separately from the NIMH battery that's connected to the electronic speed controller, which is also connected to the PCA9865.
 
 ![ServoDriver](docs/images/servo_driver.png)
 
