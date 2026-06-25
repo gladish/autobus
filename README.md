@@ -20,11 +20,11 @@ I’m going to take one of these buses and convert it into a fully autonomous ve
 
 ### Phase 1 - Hardware Augmentation
 
-The first step is to outfit the bus with new hardware. I went back and forth between an Arduino UnoQ and a Raspberry Pi, but I’m going with a Raspberry Pi for a few reasons.
+The first step is to outfit the bus with new hardware. I went back and forth between an Arduino UNO-Q and a Raspberry Pi, but I’m going with a Raspberry Pi for a few reasons.
 1. I wasn't sure if the UnoQ's arm core was powerful enougth to run things like OpenCV
 1. I already own an rpi5
-1. I'm anxiously waiting for Arduino Ventuno Q.
-I concede that using a newer dual MCP/MPU arduino would be a cleaner setup since the pi needs an external board to drive servos properly.
+1. I'm anxiously waiting for Arduino VENTUNO-Q.
+I concede that using a newer dual MCP/MPU arduino would be a cleaner setup since the pi needs an external board to drive servos properly. And although the UNO-Q needs the Arduino Media Carrier board to attach a MIPI CSI camear, it would be a cleaner package.
 
 #### Parts List
 
