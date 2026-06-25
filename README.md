@@ -34,6 +34,9 @@ I'm not sure how long that power bank will last, but I have a USB power meter th
 Here's the rpi5 booted from the Anker
 ![BatteryPowered](docs/images/battery_powered_pi.png)
 
+The Adafruit PCA9685 Server Driver connected and working. The servo driver itself is connected to the rpi via i2c and is powered by one of the rpi's 3v power pins. The servo's themselves that are attached need a seperate power supply. There are warnings all over the place that say not to power the servos via the rpi's power supply. This makes sense, but luckily the bus has an electronic speed controller (ESC). The ESC has a Tamiya style power connector and is wired to power the electronic drive motor and the servos. At this point, I vibe coded a test util in c that can turn the front wheels and adjust the throttle to forward and reserve. I'm definitely going to add higher level abstractions to make it more intuitive and harden things. As I mentioned earlier, I don't want a run-away bus.
+
+![ServerDriver](docs/images/servo_driver.png)
 
 ### Phase 3 - Network connectivity
 I want connectivity between the bus and my home LAN. This will allow me to monitor the bus, take over manually, and stream video back.
