@@ -29,7 +29,7 @@ I concede that using a newer dual MCP/MPU arduinos would be a cleaner setup sinc
 - The servo driver is wired up to the rpi.
 - Not trying to control the bus yet. Just control a servero by turning it left & right.
 
-#### Parts List
+#### M1 Parts List
 
 1. https://learn.adafruit.com/16-channel-pwm-servo-driver
 2. https://www.raspberrypi.com/products/raspberry-pi-5
@@ -38,7 +38,7 @@ I concede that using a newer dual MCP/MPU arduinos would be a cleaner setup sinc
      
 I’m not sure how long that power bank will last, but I have a USB power meter I can use to measure runtime before the Pi shuts down from low power.
 
-#### Hardware Layout
+#### M1 Hardware Layout
 ![Hardware_Layout](docs/images/rpi5_rc_car_power_diagram.png)
 
 Here’s the Raspberry Pi 5 booted from the Anker power bank:
@@ -49,25 +49,27 @@ The Adafruit PCA9685 servo driver is connected and working. The PCA9685 is conne
 
 ![ServoDriver](docs/images/servo_driver.png)
 
-### Network Connectivity
+### Milestone 2: Network Connectivity
 
 I want connectivity between the bus and my home LAN. This will let me monitor the bus, take over manually, and stream video back.
 
-#### Functional Requirements
+#### M2 Objectives
 
-- My desktop PC (Windows 11) can connect to the bus over WAN (internet).
-- My Linux LAN PC can connect to the bus over WAN (SSH, MQTT).
-- I can stream video from the Pi camera to my Windows 11 PC over WAN.
+- **Remote shell access** to the Raspberry Pi over SSH
+- **Telemetry and messaging** between the bus and other systems, likely over MQTT
+- **Manual intervention and monitoring** from my Windows desktop
+- **Video streaming** from the Pi camera back to my workstation
+- **Relay or bridge services** hosted on the Linux machine on my home network
 
-#### iPhone Tether
+#### M2 iPhone Tether
 
 The plan is to tether my iPhone to the Raspberry Pi over USB and enable hotspot on the phone. It’s a little awkward that hotspot must be enabled to get USB tethering, but that appears to be how iPhone tethering works.
 
-#### VPN
+#### M2 VPN
 
 Once the bus has internet connectivity, I’ll put everything on one network using a VPN. I’m using Tailscale because it was the first zero-cost option I found, and it’s easy to set up.
 
-#### Network Topology
+#### M2 Network Topology
 
 - My Raspberry Pi 5 (on the bus) gets internet via USB tethering to my iPhone, which uses cellular data.
 - Once online, the Raspberry Pi joins my Tailscale mesh as a node.
@@ -76,19 +78,9 @@ Once the bus has internet connectivity, I’ll put everything on one network usi
 
 ![Network Topology](docs/images/bus_tailscale_network_diagram.png)
 
-#### Intended Use
-
-This network layout is meant to support a few different tasks:
-
-- **Remote shell access** to the Raspberry Pi over SSH
-- **Telemetry and messaging** between the bus and other systems, likely over MQTT
-- **Manual intervention and monitoring** from my Windows desktop
-- **Video streaming** from the Pi camera back to my workstation
-- **Relay or bridge services** hosted on the Linux machine on my home network
-
 Using Tailscale means each machine can communicate over a private VPN without exposing services directly to the public internet.
 
-### OpenCV Vision Integration
+### Milestone 3: OpenCV Vision Integration
 - The bus can navigate itself around the block without manual steering
 
 TODO
