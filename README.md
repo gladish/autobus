@@ -20,14 +20,11 @@ I’m going to take one of these buses and convert it into a fully autonomous ve
 
 ### Phase 1 - Hardware Augmentation
 
-The first step is to outfit the bus with new hardware. I went back and forth between an Arduino Uno and a Raspberry Pi, but I’m going with a Raspberry Pi for a few reasons. I’ll need enough compute for vision and networking tasks, and I also want the flexibility of a full Linux environment.
-
-#### Functional Requirements
-
-- The bus can boot Linux, and I can control servos from software running on Linux.
-- I can attach Ethernet for networking.
-- The servo driver is connected to the Raspberry Pi.
-- The servos do not need to be specialized bus servos. The bus already has an electronic speed controller.
+The first step is to outfit the bus with new hardware. I went back and forth between an Arduino UnoQ and a Raspberry Pi, but I’m going with a Raspberry Pi for a few reasons.
+1. I wasn't sure if the UnoQ's arm core was powerful enougth to run things like OpenCV
+1. I already own an rpi5
+1. I'm anxiously waiting for Arduino Ventuno Q.
+I concede that using a newer dual MCP/MPU arduino would be a cleaner setup since the pi needs an external board to drive servos properly.
 
 #### Parts List
 
@@ -35,7 +32,14 @@ The first step is to outfit the bus with new hardware. I went back and forth bet
 2. https://www.raspberrypi.com/products/raspberry-pi-5
 3. https://www.raspberrypi.com/products/camera-module-3
 4. 5200 mAh Anker USB power bank
+   
+#### Functional Requirements
 
+- The bus can boot Linux, and I can control servos from software running on Linux.
+- I can attach Ethernet for networking.
+- The servo driver is connected to the Raspberry Pi.
+- The servos do not need to be specialized bus servos. The bus already has an electronic speed controller.
+- 
 I’m not sure how long that power bank will last, but I have a USB power meter I can use to measure runtime before the Pi shuts down from low power.
 
 Here’s the Raspberry Pi 5 booted from the Anker power bank:
