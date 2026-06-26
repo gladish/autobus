@@ -1,87 +1,31 @@
 # Autonomous Vehicle
 
-## Objective: Turn a Tamiya King Yellow 6x6 into a fully autonomous vehicle
+Autobus is a project to convert a Tamiya King Yellow 6x6 RC bus into a fully autonomous vehicle.
 
-The King Yellow is a six-wheel-drive RC kit from Tamiya. I’ll skip the nostalgia, but having built a few of these kits, I can say they’re always fun to put together.
+The current hardware platform centers around a Raspberry Pi 5 with camera and servo control hardware, with planned networking and computer vision milestones.
 
-Here’s a stock photo from Tamiya:
+## Project Goal
+
+Build an autonomous RC platform that can:
+- Control steering and drivetrain components from onboard software
+- Connect to a home network for remote operations and telemetry
+- Stream camera data for monitoring and future perception pipelines
+- Progress toward autonomous navigation using OpenCV-based vision
+
+## Base Platform
+
+- Chassis: Tamiya King Yellow 6x6 RC bus
+- Primary compute: Raspberry Pi 5
+- Servo controller: Adafruit PCA9685 (I2C)
+- Camera: Raspberry Pi Camera Module 3
+
+## Images
 
 ![The original bus](docs/images/stock_king_yellow.png)
 
-I’m going to take one of these buses and convert it into a fully autonomous vehicle. I already own one of these that's at least 10 years old, but still functional. It has some hacks on it already that I'm going to undo. For instance, I mounted a drone cam behind the front windshield. My kids and I used to sit on the back porch with a pair of fatsharks and drive it around the house. That's removed. Also, there's a gopro mount on top. I might leave that on just in case.
-
 ![Our base model](docs/images/starter_bus.png)
 
-## Plan
+## Project Tracking
 
-### Milestone 1: Hardware Augmentation
-
-The first step is to outfit the bus with some new hardware. I went back and forth between an Arduino UNO-Q and a Raspberry Pi, but I’m going with a Raspberry Pi for a few reasons.
-1. I wasn't sure if the UNO-Q's arm core was powerful enougth to run things like OpenCV
-1. The UNO-Q needs a separate board [Arduino Media Carrier Board](https://store.arduino.cc/collections/new-products/products/uno-media-carrier) for MIPI CSI cameras which doesn't seem available anywhere.
-1. I already own an rpi5.
-   
-I concede that using a newer dual MCP/MPU arduinos would be a cleaner setup since the pi needs an external board to drive servos properly. Depending on how the rpi turns out I may try the UNO-Q or just wait for the VENTUNO-Q.
-
-#### M1 Objectives
-- Can control servos from software running on the rpi.
-- Ethernet for networking. Don't worry about wireless just yet
-- The servo driver is wired up to the rpi.
-- Not trying to control the bus yet. Just control a servero by turning it left & right.
-
-#### M1 Parts List
-
-1. https://learn.adafruit.com/16-channel-pwm-servo-driver
-2. https://www.raspberrypi.com/products/raspberry-pi-5
-3. https://www.raspberrypi.com/products/camera-module-3
-4. 5200 mAh Anker USB power bank
-     
-I’m not sure how long that power bank will last, but I have a USB power meter I can use to measure runtime before the Pi shuts down from low power.
-
-#### M1 Hardware Layout
-![Hardware_Layout](docs/images/rpi5_rc_car_power_diagram.png)
-
-Here’s the Raspberry Pi 5 booted from the Anker power bank:
-
-![BatteryPowered](docs/images/battery_powered_pi.png)
-
-The Adafruit PCA9685 servo driver is connected and working. The PCA9685 is connected to the Raspberry Pi over I2C and powered from one of the Pi’s 3.3V pins. The servos are powered separately from the NIMH battery that's connected to the electronic speed controller, which is also connected to the PCA9865.
-
-![ServoDriver](docs/images/servo_driver.png)
-
-### Milestone 2: Network Connectivity
-
-I want connectivity between the bus and my home LAN. This will let me monitor the bus, take over manually, and stream video back.
-
-#### M2 Objectives
-
-- **Remote shell access** to the Raspberry Pi over SSH
-- **Telemetry and messaging** between the bus and other systems, likely over MQTT
-- **Manual intervention and monitoring** from my Windows desktop
-- **Video streaming** from the Pi camera back to my workstation
-- **Relay or bridge services** hosted on the Linux machine on my home network
-
-#### M2 iPhone Tether
-
-The plan is to tether my iPhone to the Raspberry Pi over USB and enable hotspot on the phone. It’s a little awkward that hotspot must be enabled to get USB tethering, but that appears to be how iPhone tethering works.
-
-#### M2 VPN
-
-Once the bus has internet connectivity, I’ll put everything on one network using a VPN. I’m using Tailscale because it was the first zero-cost option I found, and it’s easy to set up.
-
-#### M2 Network Topology
-
-- My Raspberry Pi 5 (on the bus) gets internet via USB tethering to my iPhone, which uses cellular data.
-- Once online, the Raspberry Pi joins my Tailscale mesh as a node.
-- My Windows 11 desktop and a Linux relay server (on my home network) are also Tailscale nodes in the same mesh.
-- Tailscale builds direct encrypted tunnels between peers when possible, and the relay server—on my home LAN with stable connectivity—can act as a fallback relay/exit node for the bus when needed.
-
-![Network Topology](docs/images/bus_tailscale_network_diagram.png)
-
-Using Tailscale means each machine can communicate over a private VPN without exposing services directly to the public internet.
-
-### Milestone 3: OpenCV Vision Integration
-- The bus can navigate itself around the block without manual steering
-
-TODO
-
+Detailed planning notes and architecture decisions are maintained in the wiki.
+Actionable work items are tracked in GitHub Issues.
