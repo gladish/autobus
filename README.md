@@ -2,11 +2,13 @@
 
 Autobus is a project to convert a Tamiya King Yellow 6x6 RC bus into a fully autonomous vehicle.
 
-The current hardware platform centers around a Raspberry Pi 5 with camera and servo control hardware, with planned networking and computer vision milestones.
+## Overview
 
-## Project Goal
+The project centers on a Raspberry Pi 5-based robotics platform with camera input and servo control hardware. The long-term goal is to build toward autonomous navigation, while the immediate focus is on establishing a reliable hardware and software foundation for control, connectivity, and perception.
 
-Build an autonomous RC platform that can:
+## Project Goals
+
+Autobus is intended to become an autonomous RC platform that can:
 - Control steering and drivetrain components from onboard software
 - Connect to a home network for remote operations and telemetry
 - Stream camera data for monitoring and future perception pipelines
@@ -25,7 +27,7 @@ Build an autonomous RC platform that can:
 
 ![Our base model](docs/images/starter_bus.png)
 
-## Project Tracking
+## Project Resources
 
-Detailed planning notes and architecture decisions are maintained in the wiki.
-Actionable work items are tracked in GitHub Issues.
+- [Wiki](https://github.com/gladish/autobus/wiki) for planning notes, architecture decisions, and project journal entries
+- [Issues](https://github.com/gladish/autobus/issues) for actionable work items, bugs, and feature tracking
