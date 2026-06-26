@@ -18,10 +18,10 @@ I’m going to take one of these buses and convert it into a fully autonomous ve
 
 The first step is to outfit the bus with some new hardware. I went back and forth between an Arduino UNO-Q and a Raspberry Pi, but I’m going with a Raspberry Pi for a few reasons.
 1. I wasn't sure if the UNO-Q's arm core was powerful enougth to run things like OpenCV
-1. The UNO-Q needs a separate board for MIPI CSI cameras.
+1. The UNO-Q needs a separate board [Arduino Media Carrier Board](https://store.arduino.cc/collections/new-products/products/uno-media-carrier) for MIPI CSI cameras which doesn't seem available anywhere.
 1. I already own an rpi5.
    
-I concede that using a newer dual MCP/MPU arduinos would be a cleaner setup since the pi needs an external board to drive servos properly. And although the UNO-Q needs the Arduino Media Carrier board to attach a MIPI CSI camera, it would be a cleaner package. Depending on how the rpi turns out I may try the UNO-Q or just wait for the VENTUNO-Q.
+I concede that using a newer dual MCP/MPU arduinos would be a cleaner setup since the pi needs an external board to drive servos properly. Depending on how the rpi turns out I may try the UNO-Q or just wait for the VENTUNO-Q.
 
 #### M1 Objectives
 - Can control servos from software running on the rpi.
