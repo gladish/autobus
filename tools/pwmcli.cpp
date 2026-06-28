@@ -152,8 +152,8 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  Servo servo{servo_driver, cfg.servo};
-  Esc esc{servo_driver, cfg.esc};
+  Servo servo{ servo_driver, cfg.servo };
+  Esc esc{ servo_driver, cfg.esc };
 
   // Arm ESC — send neutral and wait for user confirmation
   fmt::print("  Sending neutral to ESC. Power it on now and wait for the arming beep.\n");

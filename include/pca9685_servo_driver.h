@@ -30,27 +30,27 @@ public:
   /**
    * Opens the Linux I2C device node used to communicate with the PCA9685.
    *
-   * @param i2cDevice Path to the I2C bus device (for example, "/dev/i2c-1").
+   * @param device_name Path to the I2C bus device (for example, "/dev/i2c-1").
    * @return Empty success value or an error string describing what failed.
    */
-  std::expected<void, std::string> open(std::string_view i2cDevice);
+  std::expected<void, std::string> open(std::string_view device_name);
 
   /**
    * Configures the PWM frequency for the PCA9685 channels.
    *
-   * @param freqHz Target PWM frequency in hertz.
+   * @param freq_hz Target PWM frequency in hertz.
    * @return Empty success value or an error string describing what failed.
    */
-  std::expected<void, std::string> setPwmFreq(float freqHz);
+  std::expected<void, std::string> setPwmFreq(float freq_hz);
 
   /**
    * Sets a channel pulse width in microseconds (assumes 50 Hz / 20 ms period).
    *
    * @param channel PCA9685 output channel index.
-   * @param pulseUs Pulse width in microseconds.
+   * @param pulse_us Pulse width in microseconds.
    * @return Empty success value or an error string describing what failed.
    */
-  std::expected<void, std::string> setPulseUs(int channel, int pulseUs);
+  std::expected<void, std::string> setPulseUs(int channel, int pulse_us);
 
 private:
   /**
@@ -73,5 +73,5 @@ private:
   std::expected<void, std::string> setPwm(int channel, uint16_t on, uint16_t off);
 
 private:
-  int i2cDevice_ = -1;
+  int i2c_device_fd_ = -1;
 };

@@ -86,7 +86,8 @@ void on_message(mosquitto* /* mosq */, void* user_data, mosquitto_message const*
     }
   }
 
-  if (payload_json.contains("throttle")) {
+  if (payload_json.contains("throttle"))
+  {
     float const throttle = std::clamp(payload_json["throttle"].get<float>(), -1.0f, 1.0f);
     auto const result = (throttle == 0.0f)
       ? ctx->esc->stop()
