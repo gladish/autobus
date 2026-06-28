@@ -103,11 +103,17 @@ int throttle_to_us(float t, const EscConfig& cfg)
 
 int steer_to_us(float t, const ServoConfig& cfg)
 {
+  if (cfg.reverse)
+    t = -t;
+
+  int const left_us = std::min(cfg.left_us, cfg.right_us);
+  int const right_us = std::max(cfg.left_us, cfg.right_us);
+
   if (t < 0.0f)
     return static_cast<int>(static_cast<float>(cfg.center_us) +
-                            (-t) * static_cast<float>(cfg.left_us - cfg.center_us));
+                            (-t) * static_cast<float>(left_us - cfg.center_us));
   return static_cast<int>(static_cast<float>(cfg.center_us) +
-                          t * static_cast<float>(cfg.right_us - cfg.center_us));
+                          t * static_cast<float>(right_us - cfg.center_us));
 }
 }  // namespace
 

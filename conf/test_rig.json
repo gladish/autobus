@@ -3,7 +3,8 @@
     "channel": 0,
     "center_us": 1470,
     "left_us": 920,
-    "right_us": 2080
+    "right_us": 2080,
+    "reverse": true
   },
   "esc": {
     "channel": 8,

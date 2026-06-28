@@ -8,20 +8,26 @@
 std::expected<void, std::string> Servo::steer(float t)
 {
   t = std::clamp(t, -1.0f, 1.0f);
+  if (cfg_.reverse) {
+    t = -t;
+  }
+
+  int const left_us = std::min(cfg_.left_us, cfg_.right_us);
+  int const right_us = std::max(cfg_.left_us, cfg_.right_us);
 
   int pulse_us{};
   if (t < 0.0f) {
-    // Left side: center → left_us
+    // Left side always maps toward the minimum configured pulse.
     pulse_us = static_cast<int>(std::lerp(
         static_cast<float>(cfg_.center_us),
-        static_cast<float>(cfg_.left_us),
+        static_cast<float>(left_us),
         -t));
   }
   else {
-    // Right side: center → right_us
+    // Right side always maps toward the maximum configured pulse.
     pulse_us = static_cast<int>(std::lerp(
         static_cast<float>(cfg_.center_us),
-        static_cast<float>(cfg_.right_us),
+        static_cast<float>(right_us),
         t));
   }
 

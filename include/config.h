@@ -13,6 +13,7 @@ struct ServoConfig {
   int center_us = 1500;
   int left_us = 1000;
   int right_us = 2000;
+  bool reverse = false;
 };
 
 struct EscConfig {
@@ -40,6 +41,8 @@ inline void from_json(const nlohmann::json& j, ServoConfig& s)
   j.at("center_us").get_to(s.center_us);
   j.at("left_us").get_to(s.left_us);
   j.at("right_us").get_to(s.right_us);
+  // "reverse" is the preferred key; "invert" remains for compatibility.
+  s.reverse = j.value("reverse", j.value("invert", s.reverse));
 }
 
 inline void from_json(const nlohmann::json& j, EscConfig& e)
