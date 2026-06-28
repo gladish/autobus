@@ -19,10 +19,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "pwm_controller.h"
+#include "pca9685_servo_driver.h"
 #include "speed_controller.h"
 #include "servo.h"
 #include "config.h"
+#include "logger.h"
 
 static constexpr uint16_t kMqttPort = 1883;
 static constexpr char const* kMqttHost = "100.113.97.42";
@@ -32,7 +33,7 @@ static constexpr char const kTopicCommandDrive[] = "bus/cmd/drive";
 struct BusContext
 {
   Config servo_calibration;
-  PwmController pwm;
+  PCA9685ServoDriver pca_9685_driver;
   std::unique_ptr<Servo> servo;
   std::unique_ptr<Esc> esc;
 };
@@ -41,17 +42,17 @@ void on_connect(mosquitto* mosq, void* user_data, int status)
 {
   auto* ctx = static_cast<BusContext*>(user_data);
   if (!ctx) {
-    printf("missing bus context\n");
+    ALOG_FATAL("missing bus context");
     return;
   }
 
   if (status == 0) {
-    printf("connected\n");
+    ALOG_INFO("connected");
     mosquitto_subscribe(mosq, nullptr, kTopicCommandDrive, 1 /* QoS */);
-    printf("subscribed to %s\n", kTopicCommandDrive);
+    ALOG_INFO("subscribed to %s", kTopicCommandDrive);
   }
   else {
-    printf("connect failed: %s\n", mosquitto_connack_string(status));
+    ALOG_ERROR("connect failed: %s", mosquitto_connack_string(status));
   }
 }
 
@@ -59,7 +60,7 @@ void on_message(mosquitto* /* mosq */, void* user_data, mosquitto_message const*
 {
   auto* ctx = static_cast<BusContext*>(user_data);
   if (!ctx) {
-    printf("missing bus context\n");
+    ALOG_FATAL("missing bus context");
     return;
   }
 
@@ -74,14 +75,14 @@ void on_message(mosquitto* /* mosq */, void* user_data, mosquitto_message const*
 
   auto payload_json = nlohmann::json::parse(buff, nullptr, false);
   if (payload_json.is_discarded()) {
-    printf("%s invalid json payload: %s\n", msg->topic, buff.c_str());
+    ALOG_WARN("%s invalid json payload: %s", msg->topic, buff.c_str());
     return;
   }
 
   if (payload_json.contains("steer")) {
     float const steer = std::clamp(payload_json["steer"].get<float>(), -1.0f, 1.0f);
     if (auto r = ctx->servo->steer(steer); !r) {
-      printf("[error] steer: %s\n", r.error().c_str());
+      ALOG_ERROR("steer: %s", r.error().c_str());
     }
   }
 
@@ -91,11 +92,11 @@ void on_message(mosquitto* /* mosq */, void* user_data, mosquitto_message const*
       ? ctx->esc->stop()
       : ctx->esc->throttle(throttle);
     if (!result) {
-      printf("[error] throttle: %s\n", result.error().c_str());
+      ALOG_ERROR("throttle: %s", result.error().c_str());
     }
   }
 
-  printf("[%s] %s\n", msg->topic, payload_json.dump().c_str());
+  ALOG_DEBUG("[%s] %s", msg->topic, payload_json.dump().c_str());
 }
 
 int main(int argc, char* argv[])
@@ -105,31 +106,31 @@ int main(int argc, char* argv[])
   // Load config
   auto cfg_result = load_config(config_path);
   if (!cfg_result) {
-    printf("[error] %s\n", cfg_result.error().c_str());
+    ALOG_FATAL("%s", cfg_result.error().c_str());
     return 1;
   }
 
   std::unique_ptr<BusContext> ctx = std::make_unique<BusContext>();
   ctx->servo_calibration = std::move(*cfg_result);;
 
-  if (auto status = ctx->pwm.open("/dev/i2c-1"); !status) {
-    printf("[error] %s\n", status.error().c_str());
+  if (auto status = ctx->pca_9685_driver.open(ctx->servo_calibration.i2c_device); !status) {
+    ALOG_FATAL("%s", status.error().c_str());
     return 1;
   }
 
-  if (auto status = ctx->pwm.set_pwm_freq(50.0f); !status) {
-    printf("[error] %s\n", status.error().c_str());
+  if (auto status = ctx->pca_9685_driver.setPwmFreq(50.0f); !status) {
+    ALOG_FATAL("%s", status.error().c_str());
     return 1;
   }
 
-  ctx->servo = std::make_unique<Servo>(ctx->pwm, ctx->servo_calibration.servo);
-  ctx->esc = std::make_unique<Esc>(ctx->pwm, ctx->servo_calibration.esc);
+  ctx->servo = std::make_unique<Servo>(ctx->pca_9685_driver, ctx->servo_calibration.servo);
+  ctx->esc = std::make_unique<Esc>(ctx->pca_9685_driver, ctx->servo_calibration.esc);
 
   mosquitto_lib_init();
 
   auto mosq = mosquitto_new(nullptr, true, ctx.get());
   if (!mosq) {
-    printf("failed to create client\n");
+    ALOG_FATAL("failed to create client");
     return 1;
   }
 
@@ -137,7 +138,7 @@ int main(int argc, char* argv[])
   mosquitto_message_callback_set(mosq, on_message);
 
   if (mosquitto_connect(mosq, kMqttHost, kMqttPort, kMqttKeepaliveSecs) != MOSQ_ERR_SUCCESS) {
-    printf("unable to connect to %s:%d\n", kMqttHost, kMqttPort);
+    ALOG_FATAL("unable to connect to %s:%d", kMqttHost, kMqttPort);
     return 1;
   }
 

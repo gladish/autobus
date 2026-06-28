@@ -4,8 +4,8 @@
 #include <string>
 
 #include "config.h"
+#include "pca9685_servo_driver.h"
 
-class PwmController;
 
 // ---------------------------------------------------------------------------
 // Servo — steering abstraction
@@ -21,18 +21,18 @@ class PwmController;
 class Servo
 {
 public:
-  explicit Servo(PwmController& pwm, const ServoConfig& cfg)
-    : pwm_(pwm)
+  explicit Servo(PCA9685ServoDriver& servo_driver, const ServoConfig& cfg)
+    : servo_driver_(servo_driver)
     , cfg_(cfg)
   { }
 
   // Steer in [-1.0, +1.0]. Clamps silently.
-  [[nodiscard]] std::expected<void, std::string> steer(float t);
+  std::expected<void, std::string> steer(float t);
 
   // Return to mechanical center
-  [[nodiscard]] std::expected<void, std::string> center();
+  std::expected<void, std::string> center();
 
 private:
-  PwmController& pwm_;
+  PCA9685ServoDriver& servo_driver_;
   ServoConfig cfg_;
 };

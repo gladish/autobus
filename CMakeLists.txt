@@ -31,9 +31,10 @@ FetchContent_MakeAvailable(fmt)
 # Targets
 # ---------------------------------------------------------------------------
 add_library(autobus_core STATIC
-    source/pwm_controller.cpp
+    source/pca9685_servo_driver.cpp
     source/speed_controller.cpp
     source/servo.cpp
+    source/logger.cpp
 )
 target_include_directories(autobus_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(autobus_core PUBLIC

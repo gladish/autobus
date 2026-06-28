@@ -2,7 +2,7 @@
 #include <cmath>
 
 #include "servo.h"
-#include "pwm_controller.h"
+#include "pca9685_servo_driver.h"
 
 
 std::expected<void, std::string> Servo::steer(float t)
@@ -31,10 +31,10 @@ std::expected<void, std::string> Servo::steer(float t)
         t));
   }
 
-  return pwm_.set_pulse_us(cfg_.channel, pulse_us);
+  return servo_driver_.setPulseUs(cfg_.channel, pulse_us);
 }
 
 std::expected<void, std::string> Servo::center()
 {
-  return pwm_.set_pulse_us(cfg_.channel, cfg_.center_us);
+  return servo_driver_.setPulseUs(cfg_.channel, cfg_.center_us);
 }

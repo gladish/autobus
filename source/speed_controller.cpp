@@ -2,7 +2,7 @@
 #include <cmath>
 
 #include "speed_controller.h"
-#include "pwm_controller.h"
+#include "pca9685_servo_driver.h"
 
 // ---------------------------------------------------------------------------
 // Esc
@@ -42,7 +42,7 @@ std::expected<void, std::string> Esc::throttle(float t)
           now - reverse_state_since_);
       if (elapsed < std::chrono::milliseconds(cfg_.reverse_brake_ms)) {
         pulse_us = cfg_.reverse_creep_us;
-        return pwm_.set_pulse_us(cfg_.channel, pulse_us);
+        return servo_driver_.setPulseUs(cfg_.channel, pulse_us);
       }
 
       reverse_state_ = ReverseState::NeutralPause;
@@ -54,9 +54,8 @@ std::expected<void, std::string> Esc::throttle(float t)
           now - reverse_state_since_);
       if (elapsed < std::chrono::milliseconds(cfg_.reverse_neutral_ms)) {
         pulse_us = cfg_.neutral_us;
-        return pwm_.set_pulse_us(cfg_.channel, pulse_us);
+        return servo_driver_.setPulseUs(cfg_.channel, pulse_us);
       }
-
       reverse_state_ = ReverseState::Engaged;
     }
 
@@ -67,11 +66,11 @@ std::expected<void, std::string> Esc::throttle(float t)
       -t));
   }
 
-  return pwm_.set_pulse_us(cfg_.channel, pulse_us);
+  return servo_driver_.setPulseUs(cfg_.channel, pulse_us);
 }
 
 std::expected<void, std::string> Esc::stop()
 {
   reverse_state_ = ReverseState::Ready;
-  return pwm_.set_pulse_us(cfg_.channel, cfg_.neutral_us);
+  return servo_driver_.setPulseUs(cfg_.channel, cfg_.neutral_us);
 }

@@ -10,7 +10,7 @@
 #include <string_view>
 
 #include "config.h"
-#include "pwm_controller.h"
+#include "pca9685_servo_driver.h"
 #include "servo.h"
 #include "speed_controller.h"
 
@@ -142,18 +142,18 @@ int main(int argc, char* argv[])
   fmt::print("  Q       quit\n\n");
 
   // Init PWM
-  PwmController pwm;
-  if (auto r = pwm.open("/dev/i2c-1"); !r) {
+  PCA9685ServoDriver servo_driver;
+  if (auto r = servo_driver.open("/dev/i2c-1"); !r) {
     fmt::print(stderr, "[error] {}\n", r.error());
     return 1;
   }
-  if (auto r = pwm.set_pwm_freq(50.0f); !r) {
+    if (auto r = servo_driver.setPwmFreq(50.0f); !r) {
     fmt::print(stderr, "[error] {}\n", r.error());
     return 1;
   }
 
-  Servo servo{pwm, cfg.servo};
-  Esc esc{pwm, cfg.esc};
+  Servo servo{servo_driver, cfg.servo};
+  Esc esc{servo_driver, cfg.esc};
 
   // Arm ESC — send neutral and wait for user confirmation
   fmt::print("  Sending neutral to ESC. Power it on now and wait for the arming beep.\n");

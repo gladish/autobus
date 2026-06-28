@@ -1,6 +1,6 @@
 #include "config.h"
 
-class PwmController;
+class PCA9685ServoDriver;
 
 #include <expected>
 #include <string>
@@ -22,16 +22,16 @@ class PwmController;
 class Esc
 {
 public:
-  explicit Esc(PwmController& pwm, const EscConfig& cfg)
-    : pwm_(pwm)
+  explicit Esc(PCA9685ServoDriver& servo_driver, const EscConfig& cfg)
+    : servo_driver_(servo_driver)
     , cfg_(cfg)
   { }
 
   // Throttle in [-1.0, 1.0]. Clamps silently.
-  [[nodiscard]] std::expected<void, std::string> throttle(float t);
+  std::expected<void, std::string> throttle(float t);
 
   // Send neutral immediately
-  [[nodiscard]] std::expected<void, std::string> stop();
+  std::expected<void, std::string> stop();
 
 private:
   enum class ReverseState {
@@ -41,7 +41,7 @@ private:
     Engaged,
   };
 
-  PwmController& pwm_;
+  PCA9685ServoDriver& servo_driver_;
   EscConfig cfg_;
   ReverseState reverse_state_ = ReverseState::Ready;
   std::chrono::steady_clock::time_point reverse_state_since_{};

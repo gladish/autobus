@@ -28,6 +28,7 @@ struct EscConfig {
 };
 
 struct Config {
+  std::string i2c_device = "/dev/i2c-1";
   ServoConfig servo;
   EscConfig esc;
 };
@@ -59,6 +60,7 @@ inline void from_json(const nlohmann::json& j, EscConfig& e)
 
 inline void from_json(const nlohmann::json& j, Config& c)
 {
+  c.i2c_device = j.value("i2c_device", c.i2c_device);
   j.at("servo").get_to(c.servo);
   j.at("esc").get_to(c.esc);
 }
