@@ -1,0 +1,30 @@
+# General settings
+logLevel: info
+logDestinations: [stdout]
+api: yes
+apiAddress: :9997
+
+# RTSP server
+rtsp: yes
+rtspAddress: :8554
+protocols: [udp]
+rtmp: no
+hls: no
+webrtc: no
+srt: no
+moq: no
+
+
+
+
+writeQueueSize: 64
+
+# Paths
+paths:
+  cam:
+    rpiCameraWidth: 512
+    rpiCameraHeight: 288
+    rpiCameraFPS: 10
+    rpiCameraHardwareH264Profile: baseline
+    rpiCameraBitrate: 1500000
+    source: rpiCamera
