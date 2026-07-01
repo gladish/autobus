@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
   float throttle = 0.0f;
   float steer = 0.0f;
 
-  constexpr float kThrottleStep = 0.05f;
+  constexpr float kThrottleStep = 0.03f;
   constexpr float kSteerStep = 0.05f;
 
   while (g_running) {
