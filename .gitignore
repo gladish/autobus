@@ -2,3 +2,5 @@ build/
 _deps/
 .env/
 __pycache__/
+.file_activity_report.json
+.knowledge.kavia
