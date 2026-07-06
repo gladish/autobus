@@ -1,5 +1,18 @@
 {
   "i2c_device": "/dev/i2c-1",
+  "mqtt": {
+    "host": "localhost",
+    "port": 1883,
+    "keepalive_secs": 30,
+    "topic_drive": "bus/cmd/drive",
+    "topic_arm": "bus/cmd/arm",
+    "topic_estop": "bus/cmd/estop"
+  },
+  "safety": {
+    "start_armed": false,
+    "watchdog_timeout_ms": 500,
+    "neutral_on_boot": true
+  },
   "servo": {
     "channel": 0,
     "center_us": 1526,

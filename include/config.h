@@ -31,6 +31,35 @@ struct Config {
   std::string i2c_device = "/dev/i2c-1";
   ServoConfig servo;
   EscConfig esc;
+  // Safety/control plane configuration is optional and has sensible defaults so
+  // existing calibration-only config files remain valid.
+  struct MqttConfig {
+    std::string host = "localhost";
+    int port = 1883;
+    int keepalive_secs = 30;
+    std::string topic_drive = "bus/cmd/drive";
+    // Dedicated emergency stop channel. This is intentionally separate from the
+    // drive topic so "stop now" can bypass any higher-level command structure.
+    std::string topic_estop = "bus/cmd/estop";
+    // Optional arming channel; messages can toggle armed/disarmed.
+    std::string topic_arm = "bus/cmd/arm";
+  } mqtt;
+
+  struct SafetyConfig {
+    // When false, the process starts disarmed and will ignore throttle/steer
+    // commands (except e-stop) until explicitly armed.
+    bool start_armed = false;
+    // If we haven't received a valid drive command within this window while
+    // armed, the vehicle is forced to neutral and remains "armed but stopped".
+    // This prevents runaways if the *drive-command stream* stops (e.g. autonomy
+    // controller crashes, the MQTT broker/control path dies, or the publisher
+    // stops sending). This is intentionally *not* tied to any WAN/Internet
+    // monitoring uplink; autonomy can be fully on-vehicle.
+    int watchdog_timeout_ms = 500;
+    // If true, we apply "neutral throttle + centered steering" immediately
+    // after initializing the PCA9685 outputs.
+    bool neutral_on_boot = true;
+  } safety;
 };
 
 // ---------------------------------------------------------------------------
@@ -63,6 +92,26 @@ inline void from_json(const nlohmann::json& j, Config& c)
   c.i2c_device = j.value("i2c_device", c.i2c_device);
   j.at("servo").get_to(c.servo);
   j.at("esc").get_to(c.esc);
+
+  // Optional MQTT config (kept flexible for different networks/environments).
+  if (j.contains("mqtt")) {
+    const auto& jm = j.at("mqtt");
+    c.mqtt.host = jm.value("host", c.mqtt.host);
+    c.mqtt.port = jm.value("port", c.mqtt.port);
+    c.mqtt.keepalive_secs = jm.value("keepalive_secs", c.mqtt.keepalive_secs);
+    c.mqtt.topic_drive = jm.value("topic_drive", c.mqtt.topic_drive);
+    c.mqtt.topic_estop = jm.value("topic_estop", c.mqtt.topic_estop);
+    c.mqtt.topic_arm = jm.value("topic_arm", c.mqtt.topic_arm);
+  }
+
+  // Optional safety config (defaults preserve prior behavior except that the
+  // new features are available without breaking old configs).
+  if (j.contains("safety")) {
+    const auto& js = j.at("safety");
+    c.safety.start_armed = js.value("start_armed", c.safety.start_armed);
+    c.safety.watchdog_timeout_ms = js.value("watchdog_timeout_ms", c.safety.watchdog_timeout_ms);
+    c.safety.neutral_on_boot = js.value("neutral_on_boot", c.safety.neutral_on_boot);
+  }
 }
 
 // ---------------------------------------------------------------------------
