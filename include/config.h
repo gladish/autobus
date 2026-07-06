@@ -60,6 +60,30 @@ struct Config {
     // after initializing the PCA9685 outputs.
     bool neutral_on_boot = true;
   } safety;
+
+  // Autonomy/navigation config: used by the minimal vision-based autonomy loop.
+  // Why: keeping autonomy parameters in the same JSON file makes it easy to
+  // tune thresholds in the field while reusing the same MQTT broker/topics.
+  struct AutonomyConfig {
+    // RTSP URL to consume from MediaMTX (rpiCamera -> RTSP/H264).
+    // Example: "rtsp://127.0.0.1:8554/cam"
+    std::string camera_rtsp_url = "rtsp://127.0.0.1:8554/cam";
+    // Control loop rate for autonomy decisions (publish cadence).
+    int control_hz = 10;
+    // Base throttle (0..1) used while confidently following.
+    float throttle_base = 0.10f;
+    // Hard clamp on steering output (safety / stability).
+    float max_abs_steer = 0.65f;
+    // Confidence thresholds.
+    float min_confidence_stop = 0.35f;
+    float min_confidence_slow = 0.55f;
+    // If confidence stays low for too long, disengage (stop + disarm request).
+    int low_confidence_grace_ms = 1200;
+    // Simple turning behavior.
+    int turn_ms = 650;
+    float turn_steer = 0.55f;
+    float throttle_turn = 0.08f;
+  } autonomy;
 };
 
 // ---------------------------------------------------------------------------
@@ -111,6 +135,21 @@ inline void from_json(const nlohmann::json& j, Config& c)
     c.safety.start_armed = js.value("start_armed", c.safety.start_armed);
     c.safety.watchdog_timeout_ms = js.value("watchdog_timeout_ms", c.safety.watchdog_timeout_ms);
     c.safety.neutral_on_boot = js.value("neutral_on_boot", c.safety.neutral_on_boot);
+  }
+
+  // Optional autonomy config (defaults allow starting without autonomy keys).
+  if (j.contains("autonomy")) {
+    const auto& ja = j.at("autonomy");
+    c.autonomy.camera_rtsp_url = ja.value("camera_rtsp_url", c.autonomy.camera_rtsp_url);
+    c.autonomy.control_hz = ja.value("control_hz", c.autonomy.control_hz);
+    c.autonomy.throttle_base = ja.value("throttle_base", c.autonomy.throttle_base);
+    c.autonomy.max_abs_steer = ja.value("max_abs_steer", c.autonomy.max_abs_steer);
+    c.autonomy.min_confidence_stop = ja.value("min_confidence_stop", c.autonomy.min_confidence_stop);
+    c.autonomy.min_confidence_slow = ja.value("min_confidence_slow", c.autonomy.min_confidence_slow);
+    c.autonomy.low_confidence_grace_ms = ja.value("low_confidence_grace_ms", c.autonomy.low_confidence_grace_ms);
+    c.autonomy.turn_ms = ja.value("turn_ms", c.autonomy.turn_ms);
+    c.autonomy.turn_steer = ja.value("turn_steer", c.autonomy.turn_steer);
+    c.autonomy.throttle_turn = ja.value("throttle_turn", c.autonomy.throttle_turn);
   }
 }
 

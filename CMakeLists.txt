@@ -12,6 +12,7 @@ include(FetchContent)
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(MOSQUITTO REQUIRED IMPORTED_TARGET libmosquitto)
+pkg_check_modules(OPENCV REQUIRED IMPORTED_TARGET opencv4)
 
 FetchContent_Declare(
     nlohmann_json
@@ -78,6 +79,29 @@ target_compile_options(busctld PRIVATE
 add_executable(pwmcli tools/pwmcli.cpp)
 target_link_libraries(pwmcli PRIVATE autobus_core)
 target_compile_options(pwmcli PRIVATE
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wshadow
+    -Wconversion
+    -Wsign-conversion
+    -Wnull-dereference
+    -Wdouble-promotion
+    -Wformat=2
+    $<$<CONFIG:Debug>:-g -O0>
+    $<$<CONFIG:Release>:-O2>
+)
+
+# Autonomy module (OpenCV + RTSP via MediaMTX -> MQTT drive commands).
+# Why: separate binary keeps busctld (actuation safety) isolated from vision code.
+add_executable(busautonomy source/autonomy_main.cpp)
+target_include_directories(busautonomy PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(busautonomy PRIVATE
+    autobus_core
+    PkgConfig::MOSQUITTO
+    PkgConfig::OPENCV
+)
+target_compile_options(busautonomy PRIVATE
     -Wall
     -Wextra
     -Wpedantic
