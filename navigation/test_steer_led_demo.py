@@ -50,8 +50,9 @@ def main():
     cfg = SteeringConfig()
 
     try:
-        go_to(pca, cfg, cfg.min_angle, "RIGHT (expect RIGHT led on)")
-        go_to(pca, cfg, cfg.max_angle, "LEFT (expect LEFT led on)")
+        while True:
+          go_to(pca, cfg, cfg.min_angle, "RIGHT (expect RIGHT led on)")
+          go_to(pca, cfg, cfg.max_angle, "LEFT (expect LEFT led on)")
     finally:
         print("--- returning to center, leds off ---")
         pca.channels[STEERING_CHANNEL].duty_cycle = angle_to_duty_cycle(cfg.center_angle)

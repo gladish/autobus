@@ -15,8 +15,8 @@ from dataclasses import dataclass
 @dataclass
 class SteeringConfig:
     center_angle: float = 90.0      # servo angle that points wheels straight
-    min_angle: float = 60.0         # mechanical limit, right (measured on hardware)
-    max_angle: float = 120.0        # mechanical limit, left (measured on hardware)
+    min_angle: float = 40.0         # mechanical limit, right (measured on hardware)
+    max_angle: float = 150.0        # mechanical limit, left (measured on hardware)
     gain: float = -0.05              # degrees of correction per pixel of offset
     deadband_px: int = 15           # ignore offsets smaller than this
     smoothing: float = 0.3          # 0 = no smoothing, 1 = ignore new readings
