@@ -11,7 +11,7 @@ app = Flask(__name__)
 camera = Picamera2()
 camera.configure(
     camera.create_preview_configuration(
-        main={"format": "RGB888", "size": (320, 240)}
+        main={"format": "RGB888", "size": (620, 480)}
     )
 )
 camera.start()
@@ -23,7 +23,7 @@ def generate_frames():
     while True:
         start = time.time()
         frame = camera.capture_array()
-        ret, buff = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 10])
+        ret, buff = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
         frame = buff.tobytes()
 
         yield (

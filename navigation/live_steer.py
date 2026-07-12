@@ -21,7 +21,8 @@ SAFETY NOTES -- read before running with the drive motor connected:
       "lost the sidewalk" frames are tolerated before should_stop fires.
       Tune this down (more cautious) before any real outdoor test.
 """
-
+import math
+import sys
 import time
 
 from picamera2 import Picamera2
@@ -31,6 +32,7 @@ import busio
 
 from sidewalk_detect import analyze_frame, DEFAULT_SIDEWALK_HSV_LOW, DEFAULT_SIDEWALK_HSV_HIGH
 from steering_controller import SteeringController, SteeringConfig
+from led_control import update_leds
 
 STEERING_CHANNEL = 0        # PCA9685 channel the steering servo is wired to
 SERVO_PWM_FREQ = 50         # standard analog servo frequency (Hz)
@@ -39,7 +41,6 @@ SERVO_PWM_FREQ = 50         # standard analog servo frequency (Hz)
 # but confirm against your servo's datasheet before trusting them.
 SERVO_MIN_PULSE_US = 1000   # pulse width at 0 degrees
 SERVO_MAX_PULSE_US = 2000   # pulse width at 180 degrees
-
 
 def angle_to_duty_cycle(angle_deg, pca_freq=SERVO_PWM_FREQ):
     """Convert a servo angle (0-180) to a PCA9685 16-bit duty cycle value."""
@@ -59,13 +60,24 @@ def main():
     picam2.configure(config)
     picam2.start()
 
-    controller = SteeringController(SteeringConfig())
+    steering_config = SteeringConfig()
+    controller = SteeringController(steering_config)
     sidewalk_low, sidewalk_high = DEFAULT_SIDEWALK_HSV_LOW, DEFAULT_SIDEWALK_HSV_HIGH
+    blink_state = False
 
     print("Starting steering loop. Ctrl+C to stop.")
+
+
+    TARGET_LOOP_DT = 1.0 / 24
+
     try:
+        prev_t = time.monotonic()
         while True:
             frame = picam2.capture_array()
+            now = time.monotonic()
+            measured_fps = 1.0 / (now - prev_t)
+            prev_t = now
+
             _, result = analyze_frame(frame, sidewalk_low, sidewalk_high)
             angle, should_stop = controller.update(
                 result["center_offset_px"], result["confidence"]
@@ -76,14 +88,16 @@ def main():
                 # logic (not included here) should cut drive power on this
                 # condition rather than continuing to move blind.
                 print(f"SIDEWALK LOST -- holding angle {angle:.1f}, stop drive motor here")
+                # TODO: we should beep here
+                blink_state = not blink_state
+                update_leds(pca, angle, steering_config.center_angle, blink_state)
             else:
                 pca.channels[STEERING_CHANNEL].duty_cycle = angle_to_duty_cycle(angle)
+                blink_state = False
+                update_leds(pca, angle, steering_config.center_angle, blink_state)
 
             # Print at a readable rate rather than flooding the console.
-            print(f"offset={result['center_offset_px']} conf={result['confidence']:.2f} angle={angle:.1f}")
-
-            time.sleep(0.03)  # ~30fps loop pace; adjust to match actual camera throughput
-
+            # print(f"offset={result['center_offset_px']} conf={result['confidence']:.2f} angle={angle:.1f}")
     except KeyboardInterrupt:
         pass
     finally:
@@ -95,3 +109,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
