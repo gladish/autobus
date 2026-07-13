@@ -51,12 +51,22 @@ def angle_to_duty_cycle(angle_deg, pca_freq=SERVO_PWM_FREQ):
 
 
 def main():
+    TARGET_FPS = 30
+
     i2c = busio.I2C(board.SCL, board.SDA)
     pca = PCA9685(i2c)
     pca.frequency = SERVO_PWM_FREQ
 
     picam2 = Picamera2()
-    config = picam2.create_video_configuration(main={"size": (640, 480), "format": "RGB888"})
+    config = picam2.create_video_configuration(
+        main={
+          "size": (640, 480),
+          "format": "RGB888"
+        },
+        controls={
+          "FrameRate": TARGET_FPS
+        },
+      )
     picam2.configure(config)
     picam2.start()
 
@@ -68,10 +78,12 @@ def main():
     print("Starting steering loop. Ctrl+C to stop.")
 
 
-    TARGET_LOOP_DT = 1.0 / 24
+    TARGET_LOOP_DT = 1.0 / TARGET_FPS
 
     try:
         prev_t = time.monotonic()
+        loop_start = time.monotonic()
+        frame_count = 0
         while True:
             frame = picam2.capture_array()
             now = time.monotonic()
@@ -98,6 +110,15 @@ def main():
 
             # Print at a readable rate rather than flooding the console.
             # print(f"offset={result['center_offset_px']} conf={result['confidence']:.2f} angle={angle:.1f}")
+
+            elapsed = time.monotonic() - now
+            remainder = TARGET_LOOP_DT - elapsed
+            if remainder > 0:
+              time.sleep(remainder)
+
+            frame_count += 1
+            if frame_count % (TARGET_FPS * 5) == 0:
+              print(f"measured_fps={measured_fps:.1f} target={TARGET_FPS}")
     except KeyboardInterrupt:
         pass
     finally:
