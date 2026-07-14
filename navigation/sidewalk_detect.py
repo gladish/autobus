@@ -37,7 +37,7 @@ import time
 # saturation. Use --tune to dial these in against your actual footage before
 # trusting the detector.
 # ---------------------------------------------------------------------------
-DEFAULT_SIDEWALK_HSV_LOW = (0, 0, 80)
+DEFAULT_SIDEWALK_HSV_LOW = (0, 0, 50)
 DEFAULT_SIDEWALK_HSV_HIGH = (180, 60, 255)
 
 DEFAULT_GRASS_HSV_LOW = (30, 40, 30)
