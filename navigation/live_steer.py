@@ -21,10 +21,12 @@ SAFETY NOTES -- read before running with the drive motor connected:
       "lost the sidewalk" frames are tolerated before should_stop fires.
       Tune this down (more cautious) before any real outdoor test.
 """
+import argparse
 import math
 import sys
 import time
 
+import cv2
 from picamera2 import Picamera2
 from adafruit_pca9685 import PCA9685
 import board
@@ -51,6 +53,14 @@ def angle_to_duty_cycle(angle_deg, pca_freq=SERVO_PWM_FREQ):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Live sidewalk-following steering loop")
+    parser.add_argument(
+        "--record",
+        default=None,
+        help="path to write an annotated mp4 of what the camera/controller saw (e.g. run1.mp4)",
+    )
+    args = parser.parse_args()
+
     TARGET_FPS = 30
 
     i2c = busio.I2C(board.SCL, board.SDA)
@@ -69,6 +79,12 @@ def main():
       )
     picam2.configure(config)
     picam2.start()
+
+    writer = None
+    if args.record:
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        writer = cv2.VideoWriter(args.record, fourcc, TARGET_FPS, (640, 480))
+        print(f"Recording annotated video to {args.record}")
 
     steering_config = SteeringConfig()
     controller = SteeringController(steering_config)
@@ -90,10 +106,8 @@ def main():
             measured_fps = 1.0 / (now - prev_t)
             prev_t = now
 
-            _, result = analyze_frame(frame, sidewalk_low, sidewalk_high)
-            angle, should_stop = controller.update(
-                result["center_offset_px"], result["confidence"]
-            )
+            overlay, result = analyze_frame(frame, sidewalk_low, sidewalk_high)
+            angle, should_stop = controller.update(result["center_offset_px"], result["confidence"])
 
             if should_stop:
                 # Hold steering centered-ish and, importantly, your throttle
@@ -107,6 +121,19 @@ def main():
                 pca.channels[STEERING_CHANNEL].duty_cycle = angle_to_duty_cycle(angle)
                 blink_state = False
                 update_leds(pca, angle, steering_config.center_angle, blink_state)
+
+            if writer is not None:
+                status = "STOP" if should_stop else "DRIVE"
+                cv2.putText(
+                    overlay,
+                    f"servo angle={angle:.1f} [{status}]",
+                    (10, 80),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.7,
+                    (0, 0, 0),
+                    2,
+                )
+                writer.write(overlay)
 
             # Print at a readable rate rather than flooding the console.
             # print(f"offset={result['center_offset_px']} conf={result['confidence']:.2f} angle={angle:.1f}")
@@ -125,6 +152,8 @@ def main():
         # Return steering to center and release the camera cleanly on exit.
         pca.channels[STEERING_CHANNEL].duty_cycle = angle_to_duty_cycle(SteeringConfig().center_angle)
         picam2.stop()
+        if writer is not None:
+            writer.release()
         print("Stopped, steering centered.")
 
 

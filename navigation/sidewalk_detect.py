@@ -172,7 +172,7 @@ def analyze_frame(frame, sidewalk_low, sidewalk_high, num_scan_rows=8, roi_top_f
             (10, 30),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.7,
-            (0, 255, 0) if abs(center_offset_px) < 40 else (0, 0, 255),
+            (0, 0, 0),
             2,
         )
 
@@ -183,7 +183,7 @@ def analyze_frame(frame, sidewalk_low, sidewalk_high, num_scan_rows=8, roi_top_f
         (10, 55),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.6,
-        (255, 255, 255),
+        (0, 0, 0),
         1,
     )
 
